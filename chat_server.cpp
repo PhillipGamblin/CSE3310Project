@@ -34,6 +34,7 @@ typedef std::deque<chat_message> chat_message_queue;
 std::vector<std::string> users;
 std::vector<std::string> passwords;
 std::vector<std::string> logged_in_users;
+std::vector<chat_room> chat_rooms;
 
 std::string filename = "sp.txt";
 
@@ -109,11 +110,11 @@ public:
 
   void start()
   {
-    /*if(logged_in_users.size() >= 50)
+    if(logged_in_users.size() >= 50)
       {
 
         return;
-      }*/
+      }
     room_.join(shared_from_this());
     do_read_header();
   }
@@ -138,7 +139,7 @@ private:
         {
           if (!ec && read_msg_.decode_header())
           {
-            //printf("\n%s",read_msg_.data());
+            printf("\n%s",read_msg_.body());
             do_read_body();
           }
           else
@@ -157,6 +158,7 @@ private:
         {
           if (!ec)
           {
+
             room_.deliver(read_msg_);
             do_read_header();
           }
@@ -235,6 +237,7 @@ private:
 
   tcp::acceptor acceptor_;
   chat_room room_;
+  chat_rooms.push_back(room_);
   //chat_room room2, room3, room4, room5, room6,room7,room8,room9,room10;
 };
 
@@ -280,7 +283,7 @@ void load_msg(chat_room& roomit, std::string filenamer)
   std::fstream file;
   std::string line;
   char ln[chat_message::max_body_length + 1];
-    file.open(filenamer);
+    file.open("room1.txt");
 //    if(file.is_open()){
     while(std::getline(file,line))
     {
@@ -364,7 +367,8 @@ int main(int argc, char* argv[])
 {
   try
   {
-  /*  if (argc < 2)
+    /*
+    if (argc < 2)
     {
       std::cerr << "Usage: chat_server <port> [<port> ...]\n";
       return 1;
@@ -379,7 +383,7 @@ int main(int argc, char* argv[])
     //{
       tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[1]));
       servers.emplace_back(io_context, endpoint);
-    //}
+  //  }
     load_file();
 
 
