@@ -559,7 +559,14 @@ void Interface::chatroom_features(int operation, WINDOW *chatrooms_avail, WINDOW
         mvwgetnstr(join_room, 7, 30, chatroom_name, 10 );
         mvwprintw(join_room, 12, (40-strlen("Enter the password:"))/2, "Enter the password: ");
         mvwgetnstr(join_room, 12, 30, chat_pass, 8 );
-        std::string new_str = std::string(chatroom_name);
+      
+    } else if(operation == 2) {
+        mvwprintw(join_room, 1, 13, "Create a Chatroom");
+        mvwprintw(join_room, 7, (40-strlen("Enter a chat name:"))/2, "Enter a chat name: ");
+        mvwgetnstr(join_room, 7, 30, chatroom_name, 10 );
+        mvwprintw(join_room, 12, (40-strlen("Enter the password:"))/2, "Enter the password: ");
+        mvwgetnstr(join_room, 12, 30, chat_pass, 8 );
+		  std::string new_str = std::string(chatroom_name);
         choices.push_back(new_str);
         std::vector<std::string> new_chatroom;
         chatrooms.push_back(new_chatroom);
@@ -574,12 +581,6 @@ void Interface::chatroom_features(int operation, WINDOW *chatrooms_avail, WINDOW
         print_chat_log(chatlines, chatlog, 1, 1, 0);
         mvwprintw(curr_chat, 1, 70, "%s", chatroom_name);
         wrefresh(curr_chat);
-    } else if(operation == 2) {
-        mvwprintw(join_room, 1, 13, "Create a Chatroom");
-        mvwprintw(join_room, 7, (40-strlen("Enter a chat name:"))/2, "Enter a chat name: ");
-        mvwgetnstr(join_room, 7, 30, chatroom_name, 10 );
-        mvwprintw(join_room, 12, (40-strlen("Enter the password:"))/2, "Enter the password: ");
-        mvwgetnstr(join_room, 12, 30, chat_pass, 8 );
     } else if(operation == 3) {
         mvwprintw(join_room, 1, 13, "Leave a Chatroom");
         mvwprintw(join_room, 7, (40-strlen("Enter a chat name:"))/2, "Enter a chat name: ");
