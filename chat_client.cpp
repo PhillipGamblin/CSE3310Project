@@ -18,6 +18,7 @@
 #include <ncurses.h>
 
 
+
 using asio::ip::tcp;
 
 typedef std::deque<chat_message> chat_message_queue;
@@ -92,18 +93,20 @@ private:
         {
           if (!ec)
           {
-						std::cerr.write(read_msg_.body(), read_msg_.body_length());
-            std::cerr << "\n";
+						//std::cerr.write(read_msg_.body(), read_msg_.body_length());
+            //std::cerr << "\n";
             //------------------------------################################################
             //###############################################################################################
-			std::string complete_string(read_msg_.body(),read_msg_.body_length());
-            //usr_interface.chatrooms[usr_interface.cur_room].push_back(complete_string);
+					std::string complete_string(read_msg_.body(),read_msg_.body_length());
+						//std::cerr << complete_string << "s";
+						usr_interface.chatrooms[usr_interface.cur_room].push_back(complete_string);
 						wclear(usr_interface.lines);
 						wclear(usr_interface.log);
-						
-						//usr_interface.print_chat_log(usr_interface.lines,usr_interface.log,1,1,0);
+						//usr_interface.add_to_chatroom();
+						usr_interface.print_chat_log(usr_interface.lines,usr_interface.log,1,1,usr_interface.cur_room);
 						wrefresh(usr_interface.lines);
 						wrefresh(usr_interface.log);
+						//wrefresh(usr_interface.message);
 						
 
             do_read_header();
@@ -147,7 +150,8 @@ private:
 int main(int argc, char* argv[])
 {
   try{
-    Interface usr_interface;
+while(1){
+	
     WINDOW *startup = NULL;
       WINDOW *inputscreen = NULL;
 
@@ -163,8 +167,10 @@ int main(int argc, char* argv[])
       {
   	  char * ip_address = usr_interface.get_ip();
       asio::io_context io_context;
-      char * port;
-      port = "9000";
+      char * port ;//= "9000";
+	  port = (char*)malloc(5);
+	std::string strprt = "9000";
+    strcpy(port, strprt.c_str());
       argv[2] = port;
       argv[1] = ip_address;
       tcp::resolver resolver(io_context);
@@ -254,132 +260,127 @@ int main(int argc, char* argv[])
 
   	std::thread t([&io_context](){ io_context.run(); });
 						  chat_message m;
-      while(1) {
-          while(1) {
-              // Allows the user to navigate through the join, create, or delete options at the top right window
-              c=wgetch(usr_interface.chat_ops);
-              switch(c) {
-                  // Catches if the user type the up arrow key
-                  case 'A':
-  	                if(highlight == 1) // Highlight starts at the furthest most option
-                          highlight = usr_interface.n_options;
-      	            else
-                          --highlight;
-  		            break;
-                  // Catches if the user type the down arrow key
-  	            case 'B':
-                      if(highlight == usr_interface.n_options) // Highlight starts at the earliest option
-                          highlight  = 1;
-                      else
-                          ++highlight;
-                      break;
-                  // Catches when the user wants to type a message to the chat
-                  case 't':
-                      // Allows the user to see what they're typing in
-                      echo();
-                      // Allows the user to see their cursor
-                      curs_set(1);
-                      // Input from the message box window that lets the user write a message
-                      mvwgetnstr( usr_interface.message, 1, sizeof(username) + 2, usr_interface.msg, 512 );
+     while(1) {
+        // Allows the user to navigate through the join, create, or delete options at the top right window
+        c=wgetch(usr_interface.chat_ops);
+        switch(c) {
+            // Catches if the user type the up arrow key
+            case 'A': 
+	            if(highlight == 1) // Highlight starts at the furthest most option
+                    highlight = usr_interface.n_options;
+    	        else
+                    --highlight;
+		        break;
+            // Catches if the user type the down arrow key
+	        case 'B':
+                if(highlight == usr_interface.n_options) // Highlight starts at the earliest option
+                    highlight  = 1;
+                else
+                    ++highlight;
+                break;
+            // Catches when the user wants to type a message to the chat
+            case 't':
+                // Allows the user to see what they're typing in
+                echo();
+                // Allows the user to see their cursor
+                curs_set(1);
+                // Input from the message box window that lets the user write a message
+                mvwgetnstr( usr_interface.message, 1, sizeof(username) + 2, usr_interface.msg, 512 );
 
-                      // Converts char* to string in order to be stored into filelog of all the messages sent
-                      add_msg = std::string(usr_interface.msg);
-                      // Stores the message plus the person who sent it
-                      complete_string = std::string(username) + ": " + usr_interface.msg;
-                      // chatrooms is a vector of a vector strings, so it stores the message string into the vector of
-                      // vectors of all the messages inside the chat room the user is currently in.
-                      //usr_interface.chatrooms[usr_interface.cur_room].push_back(complete_string);
-					  char line[chat_message::max_body_length + 1];
+                // Converts char* to string in order to be stored into filelog of all the messages sent
+                add_msg = std::string(usr_interface.msg);
+                // Stores the message plus the person who sent it
+                complete_string = std::string(username) + ": " + usr_interface.msg;
+                // chatrooms is a vector of a vector strings, so it stores the message string into the vector of
+                // vectors of all the messages inside the chat room the user is currently in.
+                //chatrooms[usr_interface.cur_room].push_back(complete_string);
+                 	  char line[chat_message::max_body_length + 1];
 					  strcpy(line, complete_string.c_str());
 
 					  m.body_length(std::strlen(line));
 					  std::memcpy(m.body(), line, m.body_length());
 						m.encode_header();
-						cl.write(m);
+						cl.write(m);   
+                // Erases the original log, message, and lines windows from before in order to be redrawn with the new info
+                //wclear(usr_interface.log);
+                wclear(usr_interface.message);
+                //wclear(usr_interface.lines);
 
-                      // Erases the original log, message, and lines windows from before in order to be redrawn with the new info
-						wclear(usr_interface.log);
-                      wclear(usr_interface.message);
-                      wclear(usr_interface.lines);
+                // User can't see cursor anymore
+                curs_set(0);
+                // User can't see what they're typing anymore
+                noecho();
+                // Redraws the message box to have the user's name in the box again
+                mvwprintw(usr_interface.message, 1, 1, "%s: ", username );
+                // Draws a box around the message box
+                box(usr_interface.message, 0, 0);
 
-                      // User can't see cursor anymore
-                      curs_set(0);
-                      // User can't see what they're typing anymore
-                      noecho();
-                      // Redraws the message box to have the user's name in the box again
-                      mvwprintw(usr_interface.message, 1, 1, "%s: ", username );
-                      // Draws a box around the message box
-                      box(usr_interface.message, 0, 0);
+                // Changes will now print to screen
+                wrefresh(usr_interface.message);
+                //wrefresh(usr_interface.lines);
+                //usr_interface.print_chat_log(usr_interface.lines, usr_interface.log, 1, 1, usr_interface.cur_room);
+                break;
+            // User presses the enter key
+            case 10:
+                break;
+            // Will just refresh the page behind all the windows
+            default:
+	            refresh();
+                break;
+        }
+        // Want to catch if they hit the enter key in order to catch if the user wants to join, 
+        // create, leave, or logout from a chatroom
+        if( c == 10 ) {
+            // Stores whatever choice the user wants to pick: either join, create, leave, logout
+            op_choice = highlight;
 
-                      // Changes will now print to screen
-                      wrefresh(usr_interface.message);
-                      wrefresh(usr_interface.lines);
-                      usr_interface.print_chat_log(usr_interface.lines, usr_interface.log, 1, 1, usr_interface.cur_room);
-                      break;
-                  // User presses the enter key
-                  case 10:
-                      break;
-                  // Will just refresh the page behind all the windows
-                  default:
-  	                refresh();
-                      break;
-              }
-              // Want to catch if they hit the enter key in order to catch if the user wants to join,
-              // create, leave, or logout from a chatroom
-              if( c == 10 ) {
-                  // Stores whatever choice the user wants to pick: either join, create, leave, logout
-                  op_choice = highlight;
-                  // If the user wants to get one of the op_choice choices, they need to break away from the highlight
-                  // Breaking means that the while loop that continues highlighting the choices will finally break away
-                  break;
-              } else if(c>=48 && c <=57) { // Catches the ASCII values for 0-9, needed to switch chatrooms
-                  int index=0;
-                  for(;index < usr_interface.inputs.size();index++) { // Searches through a vector of ints to find what chatroom they want to switch to
-                      if(usr_interface.inputs[index] == c) {
-                          usr_interface.cur_room=index; // Updates their current room
-                          break;
-                      }
-                  }
-                  // Makes sure they can only choose chatrooms within the number chatrooms not just press random numbers to go somewhere
-                  if(usr_interface.cur_room < usr_interface.chatrooms.size()) {
-                      // Removes these windows to allow for the windows to be rewritten with the new info
-                      wclear(usr_interface.log);
-                      wclear(usr_interface.curr);
-                      wclear(usr_interface.lines);
-                      box(usr_interface.log, 0, 0);
-                      box(usr_interface.curr, 0, 0);
+            // 5 denotres that they want to logout
+            if(op_choice != 5) {
+                // Function that deals with creating, deleting and joining chatrooms
+                usr_interface.chatroom_features(op_choice, usr_interface.rooms, usr_interface.curr, usr_interface.log, usr_interface.lines);
+                refresh();
+            } else { 
+	            refresh();
+                // Want to logout from the program
+                break;
+            }
+            // If the user wants to get one of the op_choice choices, they need to break away from the highlight
+            // Breaking means that the while loop that continues highlighting the choices will finally break away
+        } else if(c>=48 && c <=57) { // Catches the ASCII values for 0-9, needed to switch chatrooms
+            int index=0;
+            for(;index < usr_interface.inputs.size();index++) { // Searches through a vector of ints to find what chatroom they want to switch to
+                if(usr_interface.inputs[index] == c) {
+                    usr_interface.cur_room=index; // Updates their current room
+                }
+            }
+            // Makes sure they can only choose chatrooms within the number chatrooms not just press random numbers to go somewhere
+            if(usr_interface.cur_room < usr_interface.chatrooms.size()) {
+                // Removes these windows to allow for the windows to be rewritten with the new info
+                wclear(usr_interface.log);
+                wclear(usr_interface.curr);
+                wclear(usr_interface.lines);
+                box(usr_interface.log, 0, 0);
+                box(usr_interface.curr, 0, 0);
 
-                      // Changes what room they're in by displaying the name at the top of the out
-                      char new_cstr[usr_interface.choices.at(usr_interface.cur_room).size() + 1];
-                      strcpy(new_cstr, usr_interface.choices.at(usr_interface.cur_room).c_str());
-                      mvwprintw(usr_interface.curr, 1, 70, "%s", new_cstr);
-                      // Updates the new chatlog window to display what's stored within the chatroom they want to switch to
-                      usr_interface.print_chat_log(usr_interface.lines, usr_interface.log, 1, 1, usr_interface.cur_room);
+                // Changes what room they're in by displaying the name at the top of the out
+                char new_cstr[usr_interface.choices.at(usr_interface.cur_room).size() + 1];
+                strcpy(new_cstr, usr_interface.choices.at(usr_interface.cur_room).c_str());
+                mvwprintw(usr_interface.curr, 1, 70, "%s", new_cstr);
+                // Updates the new chatlog window to display what's stored within the chatroom they want to switch to
+                usr_interface.print_chat_log(usr_interface.lines, usr_interface.log, 1, 1, usr_interface.cur_room);
 
-                      // The windows will now be updated with the new information
-                      wrefresh(usr_interface.curr);
-                      wrefresh(usr_interface.log);
-                      wrefresh(usr_interface.lines);
-                  }
-              }
+                // The windows will now be updated with the new information
+                wrefresh(usr_interface.curr);
+                wrefresh(usr_interface.log);
+                wrefresh(usr_interface.lines);
+            }
+        }
 
-              // The user will keep on highlighting the top left options in order until theby hit enter to continue the process
-              else {
-                  usr_interface.option_highlight(usr_interface.chat_ops, highlight, 2);
-              }
-          }
-
-          // 4 denotres that they want to logout
-          if(op_choice != 5) {
-              // Function that deals with creating, deleting and joining chatrooms
-              usr_interface.chatroom_features(op_choice, usr_interface.rooms, usr_interface.curr, usr_interface.log, usr_interface.lines);
-              refresh();
-          } else {
-  	        refresh();
-              // Want to logout from the program
-              break;
-          }
-      }
+        // The user will keep on highlighting the top left options in order until theby hit enter to continue the process
+        else {
+            usr_interface.option_highlight(usr_interface.chat_ops, highlight, 2);
+        }
+    }
 
       // Clears out each window from showing anything in the terminal
       wclear(usr_interface.curr);
@@ -401,10 +402,9 @@ int main(int argc, char* argv[])
       // Ends the ncurses feature
       endwin();
   }
-
+}
 	}
-  
-  
+
   catch (std::exception& e)
   {
     std::cerr << "Exception: " << e.what() << "\n";

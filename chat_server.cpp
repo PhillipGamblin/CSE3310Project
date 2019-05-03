@@ -34,7 +34,7 @@ typedef std::deque<chat_message> chat_message_queue;
 std::vector<std::string> users;
 std::vector<std::string> passwords;
 std::vector<std::string> logged_in_users;
-std::vector<chat_room> chat_rooms;
+int current_number ;
 
 std::string filename = "sp.txt";
 
@@ -57,13 +57,21 @@ public:
 
   void join(chat_participant_ptr participant)
   {
-    participants_.insert(participant);
-    for (auto msg: recent_msgs_)
+    
+    for (auto msg: recent_msgs_){
+
       participant->deliver(msg);
+	  
+	  
+	}
+  
+  
   }
 
   void leave(chat_participant_ptr participant)
+  
   {
+
     participants_.erase(participant);
   }
 
@@ -197,6 +205,7 @@ private:
   chat_message read_msg_;
   chat_message_queue write_msgs_;
 };
+//std::vector<chat_room> chat_rooms;
 
 //----------------------------------------------------------------------
 
@@ -237,7 +246,7 @@ private:
 
   tcp::acceptor acceptor_;
   chat_room room_;
-  chat_rooms.push_back(room_);
+ // chat_rooms.push_back(room_);
   //chat_room room2, room3, room4, room5, room6,room7,room8,room9,room10;
 };
 
@@ -362,7 +371,6 @@ void save_file(std::string line)
 }
 
 
-
 int main(int argc, char* argv[])
 {
   try
@@ -374,9 +382,12 @@ int main(int argc, char* argv[])
       return 1;
     }
 */
+	current_number = 0;
     asio::io_context io_context;
 
-    char * port = "9000";
+    char * port;
+	std::string strprt = "9000";
+    strcpy(port, strprt.c_str());
     argv[1] = port;
     std::list<chat_server> servers;
     //for (int i = 1; i < argc; ++i)

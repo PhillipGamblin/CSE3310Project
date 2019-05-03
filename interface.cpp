@@ -35,6 +35,8 @@ Interface::Interface() {
     login.push_back("[   Enter   ]");
     login.push_back("[   Refresh   ]");
     login.push_back("[   Exit   ]");
+	
+
 
     // Stores all the available chatroom names
     // At the initial start up, the user only has access to the Lobby
@@ -505,7 +507,7 @@ void Interface::print_chat_log(WINDOW*side_win, WINDOW *new_win, int cur_x, int 
 
     wclear(new_win);
     box(new_win, 0, 0);
-    for(;start_index<end_index;start_index++) {
+    for(start_index;start_index<end_index;start_index++) {
         char cstr1[chatrooms[room].at(start_index).size() + 1];
         strcpy(cstr1, chatrooms[room].at(start_index).c_str());
         mvwprintw(new_win, ++index, 2, "%s", cstr1 );
@@ -567,7 +569,7 @@ void Interface::chatroom_features(int operation, WINDOW *chatrooms_avail, WINDOW
         wclear(curr_chat);
         wclear(chatlog);
         wclear(chatlines);
-
+		box(curr_chat,0,0);
         print_rooms_menu(chatrooms_avail, 9, 3);
         print_chat_log(chatlines, chatlog, 1, 1, 0);
         mvwprintw(curr_chat, 1, 70, "%s", chatroom_name);

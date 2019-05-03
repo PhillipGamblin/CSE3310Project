@@ -62,6 +62,7 @@ class Interface {
         int option_choice(WINDOW *inp_win, int hl);
         void chatroom_features(int operation, WINDOW *chatrooms_avail, WINDOW*curr_chat, WINDOW*chatlog, WINDOW*chatlines);
         void chatroom_Page( WINDOW*log, WINDOW*message, WINDOW*rooms, WINDOW*chat_ops, WINDOW*curr);
+		//void add_to_chatroom(){std::vector<std::string> temp; temp.push_back("FUCK MY GODDAMN LIFE");chatrooms[0] = temp;}
 };
 
 #endif
