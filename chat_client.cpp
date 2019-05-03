@@ -97,11 +97,11 @@ private:
             //------------------------------################################################
             //###############################################################################################
 			std::string complete_string(read_msg_.body(),read_msg_.body_length());
-            usr_interface.chatrooms[usr_interface.cur_room].push_back(complete_string);
+            //usr_interface.chatrooms[usr_interface.cur_room].push_back(complete_string);
 						wclear(usr_interface.lines);
 						wclear(usr_interface.log);
 						
-						usr_interface.print_chat_log(usr_interface.lines,usr_interface.log,1,1,0);
+						//usr_interface.print_chat_log(usr_interface.lines,usr_interface.log,1,1,0);
 						wrefresh(usr_interface.lines);
 						wrefresh(usr_interface.log);
 						
