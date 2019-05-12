@@ -57,19 +57,19 @@ public:
 
   void join(chat_participant_ptr participant)
   {
-    
+
     for (auto msg: recent_msgs_){
 
       participant->deliver(msg);
-	  
-	  
+
+
 	}
-  
-  
+
+
   }
 
   void leave(chat_participant_ptr participant)
-  
+
   {
 
     participants_.erase(participant);
@@ -260,7 +260,7 @@ void load_file()
   std::string temp;
   std::fstream file;
   std::string line;
-  char ln[chat_message::max_body_length + 1];
+  //char ln[chat_message::max_body_length + 1];
 
   file.open(filename); //change to proper name of load_file
   if(file.is_open())
@@ -291,7 +291,7 @@ void load_msg(chat_room& roomit, std::string filenamer)
   std::string temp;
   std::fstream file;
   std::string line;
-  char ln[chat_message::max_body_length + 1];
+  //char ln[chat_message::max_body_length + 1];
     file.open("room1.txt");
 //    if(file.is_open()){
     while(std::getline(file,line))
@@ -339,7 +339,7 @@ void save_file(std::string line)
         file.seekg(0);
         kl = false;
       }
-      else if(c = '\n')
+      else if(c == '\n')
       {
         kl = false;
       }
@@ -353,12 +353,12 @@ void save_file(std::string line)
   }
   else if(file.is_open() && d == '!')
   {
-    for(int i = 0; i < users.size(); i++)
+    for(size_t i = 0; i < users.size(); i++)
     {
       file << users[i] << ";";
     }
     file << std::endl;
-    for(int i = 0; i < users.size(); i++)
+    for(size_t i = 0; i < users.size(); i++)
     {
       file << passwords[i] << ";";
     }
@@ -386,9 +386,10 @@ int main(int argc, char* argv[])
     asio::io_context io_context;
 
     char * port;
+	port = (char*)malloc(5);
 	std::string strprt = "9000";
-    strcpy(port, strprt.c_str());
-    argv[1] = port;
+	strcpy(port, strprt.c_str());
+	argv[1] = port;
     std::list<chat_server> servers;
     //for (int i = 1; i < argc; ++i)
     //{
